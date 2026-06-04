@@ -1,0 +1,15 @@
+**/.DS_Store
+
+# Environment files
+server/.env
+server/.env.*.local
+client/.env
+client/.env.*.local
+
+# Build outputs
+server/dist
+client/dist
+
+# Dependencies
+**/node_modules
+.vercel

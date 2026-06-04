@@ -1,0 +1,3 @@
+ALTER TABLE public.rentals
+  ADD COLUMN IF NOT EXISTS odometer BIGINT NOT NULL DEFAULT 0;
+
