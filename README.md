@@ -1,4 +1,4 @@
-# Bilay's Car Rent
+#  Car Rent
 
 Premium car rental admin dashboard with an Arabic (RTL) UI, session-based login, rentals management, image uploads (max 5 per rental), and Chart.js analytics.
 
