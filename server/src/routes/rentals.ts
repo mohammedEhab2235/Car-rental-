@@ -103,6 +103,12 @@ export function rentalsRouter(supabase: SupabaseClient, bucket: string, photosEn
       return;
     }
 
+    // Update car's current odometer
+    await supabase
+      .from("cars")
+      .update({ odometer: Math.round(body.final_odometer) })
+      .eq("id", rental.car_id);
+
     const actor = req.session.user?.username ?? null;
     await supabase.from("rental_logs").insert({
       rental_id: rental.id,

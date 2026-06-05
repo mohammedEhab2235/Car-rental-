@@ -13,6 +13,7 @@ export default function NewCarForm({
   const [model, setModel] = useState("");
   const [color, setColor] = useState("");
   const [dailyPrice, setDailyPrice] = useState("0");
+  const [odometer, setOdometer] = useState("0");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +33,8 @@ export default function NewCarForm({
           car_name: carName.trim(),
           model: model.trim(),
           color: color.trim(),
-          daily_price: Number(dailyPrice || 0)
+          daily_price: Number(dailyPrice || 0),
+          odometer: Number(odometer || 0)
         })
       });
       onCreated(data.car);
@@ -53,6 +55,14 @@ export default function NewCarForm({
         value={dailyPrice}
         onChange={(e) => setDailyPrice(e.target.value)}
         inputMode="decimal"
+        dir="ltr"
+      />
+      <Input
+        label="العداد الحالي"
+        value={odometer}
+        onChange={(e) => setOdometer(e.target.value)}
+        type="number"
+        placeholder="0"
         dir="ltr"
       />
       {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-xs text-red-50">{error}</div> : null}

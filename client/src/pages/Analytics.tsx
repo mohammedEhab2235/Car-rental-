@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, BarChart3, Car as CarIcon, Wrench } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { BarChart3 } from "lucide-react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -10,7 +9,7 @@ import {
   Tooltip,
   Legend
 } from "chart.js";
-import Button from "@/components/Button";
+
 import type { AnalyticsResponse } from "@/types";
 import { api } from "@/utils/api";
 import { useToastStore } from "@/stores/toast";
@@ -18,7 +17,6 @@ import { useToastStore } from "@/stores/toast";
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 export default function Analytics() {
-  const navigate = useNavigate();
   const push = useToastStore((s) => s.push);
   const [data, setData] = useState<AnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,27 +92,11 @@ export default function Analytics() {
   return (
     <div className="min-h-screen min-h-[100dvh]">
       <div className="mx-auto max-w-6xl px-4 py-6">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="h-5 w-5 text-[#D10F1A]" />
           <div>
             <div className="text-xs font-semibold text-white/75">التحليلات</div>
-            <div className="mt-2 flex items-center gap-2 text-xl font-bold">
-              <BarChart3 className="h-5 w-5 text-[#D10F1A]" />
-              لوحة التحليلات
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="secondary" onClick={() => navigate("/available-cars")}>
-              <CarIcon className="h-4 w-4" />
-              السيارات المتوفر
-            </Button>
-            <Button variant="secondary" onClick={() => navigate("/maintenance")}>
-              <Wrench className="h-4 w-4" />
-              الصيانة
-            </Button>
-            <Button variant="secondary" onClick={() => navigate("/dashboard")}>
-              <ArrowRight className="h-4 w-4" />
-              رجوع
-            </Button>
+            <div className="mt-2 text-xl font-bold">لوحة التحليلات</div>
           </div>
         </div>
 

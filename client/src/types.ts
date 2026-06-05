@@ -4,6 +4,7 @@ export type Car = {
   model: string;
   color: string;
   daily_price: number;
+  odometer: number;
   oil_normal_target: number | null;
   oil_transmission_target: number | null;
   created_at: string;

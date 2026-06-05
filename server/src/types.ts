@@ -4,6 +4,7 @@ export type Car = {
   model: string;
   color: string;
   daily_price: number;
+  odometer: number;
   created_at: string;
 };
 

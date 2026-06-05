@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Wrench } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { Wrench } from "lucide-react";
 import Button from "@/components/Button";
 import { useToastStore } from "@/stores/toast";
 import type { Car, MaintenanceRecord } from "@/types";
@@ -9,7 +9,6 @@ import { formatDate } from "@/utils/dates";
 
 export default function CarMaintenanceHistory() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const push = useToastStore((s) => s.push);
 
   const [car, setCar] = useState<Car | null>(null);
@@ -47,12 +46,7 @@ export default function CarMaintenanceHistory() {
                 {car ? `${car.car_name} — ${car.model}` : "..."}
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button variant="secondary" onClick={() => navigate("/available-cars")}>
-                <ArrowLeft className="h-4 w-4" />
-                السيارات المتاحة
-              </Button>
-            </div>
+
           </div>
         </div>
 

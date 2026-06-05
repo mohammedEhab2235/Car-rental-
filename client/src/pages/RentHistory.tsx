@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Car as CarIcon, ChevronLeft, ChevronRight, Eye, History, LogOut, Wrench } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { ChevronLeft, ChevronRight, Eye, History } from "lucide-react";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { useAuthStore } from "@/stores/auth";
@@ -10,8 +9,6 @@ import { api } from "@/utils/api";
 import { formatDateTime } from "@/utils/dates";
 
 export default function RentHistory() {
-  const navigate = useNavigate();
-  const logout = useAuthStore((s) => s.logout);
   const push = useToastStore((s) => s.push);
 
   const [logs, setLogs] = useState<RentalLog[]>([]);
@@ -63,11 +60,6 @@ export default function RentHistory() {
     }
   }
 
-  async function onLogout() {
-    await logout();
-    navigate("/login", { replace: true });
-  }
-
   return (
     <div className="min-h-screen min-h-[100dvh]">
       <div className="mx-auto max-w-6xl px-4 py-6">
@@ -77,24 +69,7 @@ export default function RentHistory() {
               <div className="text-xs font-semibold text-white/75">سجل الإيجارات</div>
               <div className="mt-2 text-xl font-bold">Bilay's Car Rent</div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button variant="secondary" onClick={() => navigate("/dashboard")}>
-                <History className="h-4 w-4" />
-                لوحة التحكم
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/available-cars")}>
-                <CarIcon className="h-4 w-4" />
-                السيارات المتوفر
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/maintenance")}>
-                <Wrench className="h-4 w-4" />
-                الصيانة
-              </Button>
-              <Button variant="ghost" onClick={onLogout}>
-                <LogOut className="h-4 w-4" />
-                خروج
-              </Button>
-            </div>
+
           </div>
         </div>
 

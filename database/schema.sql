@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS public.cars (
   model TEXT NOT NULL,
   color TEXT NOT NULL,
   daily_price NUMERIC(10,2) NOT NULL DEFAULT 0,
+  odometer BIGINT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

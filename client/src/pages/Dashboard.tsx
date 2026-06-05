@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BarChart3, Car as CarIcon, LogOut, Plus, ReceiptText, History, Wrench } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Plus, ReceiptText } from "lucide-react";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import NewCarForm from "@/components/NewCarForm";
@@ -15,9 +14,7 @@ import type { Car, Rental } from "@/types";
 import { api } from "@/utils/api";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
   const push = useToastStore((s) => s.push);
 
   const [cars, setCars] = useState<Car[]>([]);
@@ -54,11 +51,6 @@ export default function Dashboard() {
     loadAll();
   }, [loadAll]);
 
-  async function onLogout() {
-    await logout();
-    navigate("/login", { replace: true });
-  }
-
   return (
     <div className="min-h-screen min-h-[100dvh]">
       <div className="mx-auto max-w-6xl px-4 py-6">
@@ -77,29 +69,9 @@ export default function Dashboard() {
                 <Plus className="h-4 w-4" />
                 سيارة جديدة
               </Button>
-              <Button variant="secondary" onClick={() => navigate("/available-cars")}>
-                <CarIcon className="h-4 w-4" />
-                السيارات المتوفر
-              </Button>
               <Button variant="secondary" onClick={() => setOpenRental(true)}>
                 <ReceiptText className="h-4 w-4" />
                 تأجير سيارة
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/analytics")}>
-                <BarChart3 className="h-4 w-4" />
-                لوحة التحليلات
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/rent-history")}>
-                <History className="h-4 w-4" />
-                سجل الإيجارات
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/maintenance")}>
-                <Wrench className="h-4 w-4" />
-                الصيانة
-              </Button>
-              <Button variant="ghost" onClick={onLogout}>
-                <LogOut className="h-4 w-4" />
-                خروج
               </Button>
             </div>
           </div>

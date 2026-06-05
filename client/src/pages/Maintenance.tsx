@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Car as CarIcon, LogOut, Wrench, Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Wrench, Settings } from "lucide-react";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import MaintenanceModal from "@/components/MaintenanceModal";
@@ -11,8 +10,6 @@ import type { Car } from "@/types";
 import { api } from "@/utils/api";
 
 export default function Maintenance() {
-  const navigate = useNavigate();
-  const logout = useAuthStore((s) => s.logout);
   const push = useToastStore((s) => s.push);
 
   const [cars, setCars] = useState<Car[]>([]);
@@ -38,11 +35,6 @@ export default function Maintenance() {
   useEffect(() => {
     loadCars();
   }, []);
-
-  async function onLogout() {
-    await logout();
-    navigate("/login", { replace: true });
-  }
 
   function openTargetModal(car: Car) {
     setEditCar(car);
@@ -88,20 +80,7 @@ export default function Maintenance() {
               <div className="text-xs font-semibold text-white/75">الصيانة</div>
               <div className="mt-2 text-xl font-bold">Bilay's Car Rent</div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button variant="secondary" onClick={() => navigate("/dashboard")}>
-                <ArrowRight className="h-4 w-4" />
-                رجوع
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/available-cars")}>
-                <CarIcon className="h-4 w-4" />
-                السيارات المتوفر
-              </Button>
-              <Button variant="ghost" onClick={onLogout}>
-                <LogOut className="h-4 w-4" />
-                خروج
-              </Button>
-            </div>
+
           </div>
         </div>
 

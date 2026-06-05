@@ -1,8 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Suspense, lazy, useEffect } from "react";
 import ToastHost from "@/components/ToastHost";
+import Sidebar from "@/components/Sidebar";
 import Protected from "@/components/Protected";
 import { useAuthStore } from "@/stores/auth";
+import { cn } from "@/lib/utils";
 
 const Login = lazy(() => import("@/pages/Login"));
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -21,63 +23,77 @@ export default function App() {
 
   return (
     <Router>
-      <ToastHost />
-      <Suspense fallback={<RouteFallback />}>
-        <Routes>
-          <Route path="/" element={<IndexRedirect />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              <Protected>
-                <Dashboard />
-              </Protected>
-            }
-          />
-          <Route
-            path="/analytics"
-            element={
-              <Protected>
-                <Analytics />
-              </Protected>
-            }
-          />
-          <Route
-            path="/rent-history"
-            element={
-              <Protected>
-                <RentHistory />
-              </Protected>
-            }
-          />
-          <Route
-            path="/available-cars"
-            element={
-              <Protected>
-                <AvailableCars />
-              </Protected>
-            }
-          />
-          <Route
-            path="/maintenance"
-            element={
-              <Protected>
-                <Maintenance />
-              </Protected>
-            }
-          />
-          <Route
-            path="/cars/:id/maintenance"
-            element={
-              <Protected>
-                <CarMaintenanceHistory />
-              </Protected>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+      <AppInner />
     </Router>
+  );
+}
+
+function AppInner() {
+  const location = useLocation();
+  const isLogin = location.pathname === "/login";
+
+  return (
+    <div className="min-h-screen min-h-[100dvh]">
+      {!isLogin && <Sidebar />}
+      <div className={cn(!isLogin && "md:pr-60")}>
+        <ToastHost />
+        <Suspense fallback={<RouteFallback />}>
+          <Routes>
+            <Route path="/" element={<IndexRedirect />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/dashboard"
+              element={
+                <Protected>
+                  <Dashboard />
+                </Protected>
+              }
+            />
+            <Route
+              path="/analytics"
+              element={
+                <Protected>
+                  <Analytics />
+                </Protected>
+              }
+            />
+            <Route
+              path="/rent-history"
+              element={
+                <Protected>
+                  <RentHistory />
+                </Protected>
+              }
+            />
+            <Route
+              path="/available-cars"
+              element={
+                <Protected>
+                  <AvailableCars />
+                </Protected>
+              }
+            />
+            <Route
+              path="/maintenance"
+              element={
+                <Protected>
+                  <Maintenance />
+                </Protected>
+              }
+            />
+            <Route
+              path="/cars/:id/maintenance"
+              element={
+                <Protected>
+                  <CarMaintenanceHistory />
+                </Protected>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </div>
+    </div>
   );
 }
 

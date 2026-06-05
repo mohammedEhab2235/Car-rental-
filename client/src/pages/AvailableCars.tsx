@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Car as CarIcon, ChevronLeft, ChevronRight, History, LogOut, Pencil, Plus, Trash2, Wrench } from "lucide-react";
+import { ChevronLeft, ChevronRight, History, Pencil, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
@@ -13,7 +13,6 @@ import { formatDateTime } from "@/utils/dates";
 
 export default function AvailableCars() {
   const navigate = useNavigate();
-  const logout = useAuthStore((s) => s.logout);
   const push = useToastStore((s) => s.push);
 
   const [cars, setCars] = useState<Car[]>([]);
@@ -48,11 +47,6 @@ export default function AvailableCars() {
     loadCars(1);
   }, []);
 
-  async function onLogout() {
-    await logout();
-    navigate("/login", { replace: true });
-  }
-
   async function confirmDelete() {
     if (!deletingCar) return;
     setDeleteLoading(true);
@@ -86,18 +80,7 @@ export default function AvailableCars() {
                 <Plus className="h-4 w-4" />
                 سيارة جديدة
               </Button>
-              <Button variant="secondary" onClick={() => navigate("/dashboard")}>
-                <CarIcon className="h-4 w-4" />
-                لوحة التحكم
-              </Button>
-              <Button variant="secondary" onClick={() => navigate("/maintenance")}>
-                <Wrench className="h-4 w-4" />
-                الصيانة
-              </Button>
-              <Button variant="ghost" onClick={onLogout}>
-                <LogOut className="h-4 w-4" />
-                خروج
-              </Button>
+
             </div>
           </div>
         </div>
@@ -129,7 +112,7 @@ export default function AvailableCars() {
                         {Number(c.daily_price ?? 0).toFixed(2)}
                       </div>
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="mt-4 grid grid-cols-3 gap-3">
                       <div className="rounded-xl border border-white/20 bg-white/5 px-3 py-2">
                         <div className="text-[11px] font-semibold text-white/75">اللون</div>
                         <div className="mt-1 text-sm text-white/85">{c.color}</div>
@@ -137,6 +120,10 @@ export default function AvailableCars() {
                       <div className="rounded-xl border border-white/20 bg-white/5 px-3 py-2">
                         <div className="text-[11px] font-semibold text-white/75">الموديل</div>
                         <div className="mt-1 text-sm text-white/85">{c.model}</div>
+                      </div>
+                      <div className="rounded-xl border border-white/20 bg-white/5 px-3 py-2">
+                        <div className="text-[11px] font-semibold text-white/75">العداد</div>
+                        <div className="mt-1 text-sm text-white/85" dir="ltr">{(c.odometer ?? 0).toLocaleString()}</div>
                       </div>
                     </div>
                     <div className="mt-4 flex items-center justify-end gap-2">
@@ -177,6 +164,7 @@ export default function AvailableCars() {
                   <th className="px-5 py-3 font-semibold">الموديل</th>
                   <th className="px-5 py-3 font-semibold">اللون</th>
                   <th className="px-5 py-3 font-semibold">السعر اليومي</th>
+                  <th className="px-5 py-3 font-semibold">العداد</th>
                   <th className="px-5 py-3 font-semibold">تاريخ الإضافة</th>
                   <th className="px-5 py-3 font-semibold">إجراءات</th>
                 </tr>
@@ -184,7 +172,7 @@ export default function AvailableCars() {
               <tbody className="divide-y divide-white/10">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="px-5 py-10 text-center text-sm text-white/60">
+                    <td colSpan={7} className="px-5 py-10 text-center text-sm text-white/60">
                       جاري التحميل...
                     </td>
                   </tr>
@@ -196,6 +184,9 @@ export default function AvailableCars() {
                       <td className="px-5 py-4 text-white/80">{c.color}</td>
                       <td className="px-5 py-4 font-bold text-white" dir="ltr">
                         {Number(c.daily_price ?? 0).toFixed(2)}
+                      </td>
+                      <td className="px-5 py-4 text-white/80" dir="ltr">
+                        {(c.odometer ?? 0).toLocaleString()}
                       </td>
                       <td className="px-5 py-4 text-white/80" dir="ltr">
                         {formatDateTime(c.created_at)}

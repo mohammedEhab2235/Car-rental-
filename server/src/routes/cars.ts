@@ -6,7 +6,8 @@ const CarCreateSchema = z.object({
   car_name: z.string().min(1),
   model: z.string().min(1),
   color: z.string().min(1),
-  daily_price: z.coerce.number().nonnegative().default(0)
+  daily_price: z.coerce.number().nonnegative().default(0),
+  odometer: z.coerce.number().int().nonnegative().default(0)
 });
 
 const CarUpdateSchema = z
@@ -15,6 +16,7 @@ const CarUpdateSchema = z
     model: z.string().min(1).optional(),
     color: z.string().min(1).optional(),
     daily_price: z.coerce.number().nonnegative().optional(),
+    odometer: z.coerce.number().int().nonnegative().optional(),
     oil_normal_target: z.coerce.number().int().nonnegative().optional(),
     oil_transmission_target: z.coerce.number().int().nonnegative().optional()
   })
@@ -32,7 +34,7 @@ export function carsRouter(supabase: SupabaseClient) {
     const { id } = req.params;
     const { data, error } = await supabase
       .from("cars")
-      .select("id,car_name,model,color,daily_price,oil_normal_target,oil_transmission_target,created_at")
+      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,created_at")
       .eq("id", id)
       .single();
 
@@ -57,7 +59,7 @@ export function carsRouter(supabase: SupabaseClient) {
 
     let query = supabase
       .from("cars")
-      .select("id,car_name,model,color,daily_price,oil_normal_target,oil_transmission_target,created_at")
+      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,created_at")
       .order("created_at", { ascending: false });
 
     if (isPaginated) {
@@ -104,7 +106,7 @@ export function carsRouter(supabase: SupabaseClient) {
     const { data, error } = await supabase
       .from("cars")
       .insert(payload)
-      .select("id,car_name,model,color,daily_price,oil_normal_target,oil_transmission_target,created_at")
+      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,created_at")
       .single();
 
     if (error) {
@@ -129,7 +131,7 @@ export function carsRouter(supabase: SupabaseClient) {
       .from("cars")
       .update(payload)
       .eq("id", id)
-      .select("id,car_name,model,color,daily_price,oil_normal_target,oil_transmission_target,created_at")
+      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,created_at")
       .single();
 
     if (error) {
