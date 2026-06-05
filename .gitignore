@@ -13,3 +13,9 @@ client/dist
 # Dependencies
 **/node_modules
 .vercel
+
+# Supabase local temp files
+supabase/.temp/
+
+# Local agent documents
+.trae/

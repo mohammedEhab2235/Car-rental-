@@ -28,6 +28,22 @@ export function carsRouter(supabase: SupabaseClient) {
     per_page: z.coerce.number().int().min(1).max(100).optional()
   });
 
+  router.get("/:id", async (req, res) => {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from("cars")
+      .select("id,car_name,model,color,daily_price,oil_normal_target,oil_transmission_target,created_at")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      res.status(500).json({ message: "تعذر تحميل بيانات السيارة.", details: error.message });
+      return;
+    }
+
+    res.json({ car: data });
+  });
+
   router.get("/", async (req, res) => {
     const parsed = QuerySchema.safeParse(req.query);
     if (!parsed.success) {

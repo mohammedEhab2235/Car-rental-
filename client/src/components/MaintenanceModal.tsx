@@ -8,6 +8,15 @@ import { formatDate } from "@/utils/dates";
 
 type ItemRow = { id: string; item_type: string; price: string };
 
+const ARABIC_TO_ENGLISH: Record<string, string> = {
+  "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+  "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9"
+};
+
+function toEnglishNumbers(str: string): string {
+  return str.replace(/[٠-٩]/g, (d) => ARABIC_TO_ENGLISH[d] ?? d);
+}
+
 export default function MaintenanceModal({
   car,
   onClose,
@@ -30,21 +39,35 @@ export default function MaintenanceModal({
   const oilNormalTarget = car.oil_normal_target ?? 0;
   const oilTransmissionTarget = car.oil_transmission_target ?? 0;
 
+  const lastOilNormal = useMemo(() => {
+    const rec = records.find((r) => r.oil_normal_current != null);
+    return rec?.oil_normal_current ?? null;
+  }, [records]);
+
+  const lastOilTransmission = useMemo(() => {
+    const rec = records.find((r) => r.oil_transmission_current != null);
+    return rec?.oil_transmission_current ?? null;
+  }, [records]);
+
   const oilNormalStatus = useMemo(() => {
     const current = Number(oilNormalCurrent);
     if (!oilNormalTarget || !current) return null;
-    if (current >= oilNormalTarget) return { ok: false, text: "يجب تغيير زيت المحرك الآن!" };
-    const remaining = oilNormalTarget - current;
+    const prev = lastOilNormal ?? 0;
+    const diff = current - prev;
+    if (diff >= oilNormalTarget) return { ok: false, text: "يجب تغيير زيت المحرك!" };
+    const remaining = oilNormalTarget - diff;
     return { ok: true, text: `متبقي ${remaining.toLocaleString()} كم قبل تغيير زيت المحرك` };
-  }, [oilNormalCurrent, oilNormalTarget]);
+  }, [oilNormalCurrent, oilNormalTarget, lastOilNormal]);
 
   const oilTransmissionStatus = useMemo(() => {
     const current = Number(oilTransmissionCurrent);
     if (!oilTransmissionTarget || !current) return null;
-    if (current >= oilTransmissionTarget) return { ok: false, text: "يجب تغيير زيت الفتيس الآن!" };
-    const remaining = oilTransmissionTarget - current;
+    const prev = lastOilTransmission ?? 0;
+    const diff = current - prev;
+    if (diff >= oilTransmissionTarget) return { ok: false, text: "يجب تغيير زيت الفتيس!" };
+    const remaining = oilTransmissionTarget - diff;
     return { ok: true, text: `متبقي ${remaining.toLocaleString()} كم قبل تغيير زيت الفتيس` };
-  }, [oilTransmissionCurrent, oilTransmissionTarget]);
+  }, [oilTransmissionCurrent, oilTransmissionTarget, lastOilTransmission]);
 
   async function loadRecords() {
     setLoading(true);
@@ -183,7 +206,7 @@ export default function MaintenanceModal({
                   step="0.01"
                   min="0"
                   value={row.price}
-                  onChange={(e) => updateItemRow(row.id, "price", e.target.value)}
+                  onChange={(e) => updateItemRow(row.id, "price", toEnglishNumbers(e.target.value))}
                   dir="ltr"
                 />
               </div>

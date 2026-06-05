@@ -10,6 +10,7 @@ const Analytics = lazy(() => import("@/pages/Analytics"));
 const RentHistory = lazy(() => import("@/pages/RentHistory"));
 const AvailableCars = lazy(() => import("@/pages/AvailableCars"));
 const Maintenance = lazy(() => import("@/pages/Maintenance"));
+const CarMaintenanceHistory = lazy(() => import("@/pages/CarMaintenanceHistory"));
 
 export default function App() {
   const load = useAuthStore((s) => s.load);
@@ -62,6 +63,14 @@ export default function App() {
             element={
               <Protected>
                 <Maintenance />
+              </Protected>
+            }
+          />
+          <Route
+            path="/cars/:id/maintenance"
+            element={
+              <Protected>
+                <CarMaintenanceHistory />
               </Protected>
             }
           />
