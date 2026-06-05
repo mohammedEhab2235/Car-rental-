@@ -150,7 +150,8 @@ export default function MaintenanceModal({
           <div>
             <div className="mb-2 text-xs font-semibold text-white/80">زيت المحرك — العداد الحالي (كم)</div>
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={oilNormalCurrent}
               onChange={(e) => setOilNormalCurrent(toEnglishNumbers(e.target.value))}
               placeholder="مثال: 125000"
@@ -168,7 +169,8 @@ export default function MaintenanceModal({
           <div>
             <div className="mb-2 text-xs font-semibold text-white/80">زيت الفتيس — العداد الحالي (كم)</div>
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={oilTransmissionCurrent}
               onChange={(e) => setOilTransmissionCurrent(toEnglishNumbers(e.target.value))}
               placeholder="مثال: 125000"
@@ -202,9 +204,8 @@ export default function MaintenanceModal({
               <div className="w-32">
                 <Input
                   placeholder="السعر"
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
                   value={row.price}
                   onChange={(e) => updateItemRow(row.id, "price", toEnglishNumbers(e.target.value))}
                   dir="ltr"
