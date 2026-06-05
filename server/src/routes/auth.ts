@@ -16,26 +16,31 @@ export function authRouter(env: Env) {
   });
 
   router.post("/login", async (req, res) => {
-    const parsed = LoginSchema.safeParse(req.body);
-    if (!parsed.success) {
-      res.status(400).json({ message: "بيانات تسجيل الدخول غير صحيحة." });
-      return;
-    }
+    try {
+      const parsed = LoginSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({ message: "بيانات تسجيل الدخول غير صحيحة." });
+        return;
+      }
 
-    const { username, password } = parsed.data;
-    if (username !== env.ADMIN_USERNAME) {
-      res.status(401).json({ message: "اسم المستخدم أو كلمة المرور غير صحيحة." });
-      return;
-    }
+      const { username, password } = parsed.data;
+      if (username !== env.ADMIN_USERNAME) {
+        res.status(401).json({ message: "اسم المستخدم أو كلمة المرور غير صحيحة." });
+        return;
+      }
 
-    const ok = await bcrypt.compare(password, env.ADMIN_PASSWORD_HASH);
-    if (!ok) {
-      res.status(401).json({ message: "اسم المستخدم أو كلمة المرور غير صحيحة." });
-      return;
-    }
+      const ok = await bcrypt.compare(password, env.ADMIN_PASSWORD_HASH);
+      if (!ok) {
+        res.status(401).json({ message: "اسم المستخدم أو كلمة المرور غير صحيحة." });
+        return;
+      }
 
-    req.session.user = { username, loggedInAt: Date.now() };
-    res.json({ ok: true });
+      req.session.user = { username, loggedInAt: Date.now() };
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("Login error:", err);
+      res.status(500).json({ message: err instanceof Error ? err.message : "خطأ في تسجيل الدخول" });
+    }
   });
 
   router.post("/logout", (req, res) => {
