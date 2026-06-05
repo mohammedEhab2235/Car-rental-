@@ -152,7 +152,7 @@ export default function MaintenanceModal({
             <Input
               type="number"
               value={oilNormalCurrent}
-              onChange={(e) => setOilNormalCurrent(e.target.value)}
+              onChange={(e) => setOilNormalCurrent(toEnglishNumbers(e.target.value))}
               placeholder="مثال: 125000"
               dir="ltr"
             />
@@ -170,7 +170,7 @@ export default function MaintenanceModal({
             <Input
               type="number"
               value={oilTransmissionCurrent}
-              onChange={(e) => setOilTransmissionCurrent(e.target.value)}
+              onChange={(e) => setOilTransmissionCurrent(toEnglishNumbers(e.target.value))}
               placeholder="مثال: 125000"
               dir="ltr"
             />
