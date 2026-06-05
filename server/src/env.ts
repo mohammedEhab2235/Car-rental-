@@ -14,8 +14,8 @@ const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).optional(),
   PORT: z.string().optional(),
   SESSION_SECRET: z.string().min(16),
-  ADMIN_USERNAME: z.string().min(1),
-  ADMIN_PASSWORD_HASH: z.string().min(1),
+  ADMIN_USERNAME: z.string().min(1).optional(),
+  ADMIN_PASSWORD_HASH: z.string().min(1).optional(),
   DATABASE_URL: z.string().min(1).optional(),
   SUPABASE_URL: z.string().url(),
   SUPABASE_SERVICE_ROLE_KEY: z

@@ -22,7 +22,7 @@ export default function Login() {
     }
     setLoading(true);
     try {
-      await login(username.trim(), password);
+      await login(username.trim(), password.trim());
       push({ kind: "success", title: "تم تسجيل الدخول", message: "مرحبًا بك في لوحة التحكم." });
       navigate("/dashboard", { replace: true });
     } catch (err) {
@@ -66,6 +66,8 @@ export default function Login() {
                 label="اسم المستخدم"
                 name="username"
                 autoComplete="username"
+                autoCapitalize="off"
+                autoCorrect="off"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="admin"

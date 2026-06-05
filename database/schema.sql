@@ -119,3 +119,14 @@ CREATE TABLE IF NOT EXISTS public.rental_logs (
 CREATE INDEX IF NOT EXISTS rental_logs_rental_id_idx ON public.rental_logs(rental_id);
 CREATE INDEX IF NOT EXISTS rental_logs_car_id_idx ON public.rental_logs(car_id);
 CREATE INDEX IF NOT EXISTS rental_logs_created_at_idx ON public.rental_logs(created_at);
+
+CREATE TABLE IF NOT EXISTS public.users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL DEFAULT 'admin',
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS users_username_idx ON public.users(username);

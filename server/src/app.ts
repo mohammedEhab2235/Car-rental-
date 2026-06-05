@@ -21,7 +21,7 @@ export const app = express();
 
 const origin = env.CORS_ORIGIN?.split(",").map((s: string) => s.trim()).filter(Boolean);
 
-app.set("trust proxy", 1);
+app.set("trust proxy", true);
 app.use(
   cors({
     origin: origin && origin.length ? origin : true,
@@ -54,8 +54,8 @@ if (env.DATABASE_URL) {
       conString: env.DATABASE_URL,
       createTableIfMissing: true
     });
-  } catch {
-    // Fallback to default memory store if connect-pg-simple fails to initialize
+  } catch (err) {
+    console.error("connect-pg-simple failed, falling back to memory store:", err);
   }
 }
 

@@ -50,8 +50,9 @@ The project is a monorepo with two main packages:
 │   ├── .env              # Environment variables (copy from .env.example)
 │   └── tsconfig.json     # strict: true
 ├── database/
-│   ├── schema.sql        # Full DB schema (cars, rentals, rental_photos, rental_logs)
+│   ├── schema.sql        # Full DB schema (cars, rentals, rental_photos, rental_logs, users)
 │   └── seed.sql          # Optional demo data
+│   └── scripts/          # Helper scripts (create-admin)
 └── supabase/migrations/  # Incremental migration files
 ```
 
@@ -100,8 +101,8 @@ The project is configured for fullstack deployment on Vercel:
 4. Add all environment variables from `server/.env.example` in the Vercel dashboard (**Settings → Environment Variables**):
    - `NODE_ENV=production`
    - `SESSION_SECRET` (min 16 chars)
-   - `ADMIN_USERNAME`
-   - `ADMIN_PASSWORD_HASH`
+   - `ADMIN_USERNAME` (optional; legacy fallback)
+   - `ADMIN_PASSWORD_HASH` (optional; legacy fallback)
    - `DATABASE_URL` (Postgres connection with `sslmode=require`)
    - `SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
@@ -129,8 +130,14 @@ Copy `server/.env.example` to `server/.env` and fill in:
 |----------|-------------|
 | `PORT` | Server port (default: 3001) |
 | `SESSION_SECRET` | Min 16 chars |
-| `ADMIN_USERNAME` | Single admin username |
-| `ADMIN_PASSWORD_HASH` | bcrypt hash of the admin password |
+| `ADMIN_USERNAME` | Optional legacy fallback username |
+| `ADMIN_PASSWORD_HASH` | Optional legacy fallback bcrypt hash |
+
+Credentials are now stored in the `public.users` table. To create the first admin:
+```bash
+cd server
+npx tsx scripts/create-admin.ts <username> <password>
+```
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service-role key (not publishable/anon key) |
 | `SUPABASE_STORAGE_BUCKET` | Defaults to `rental-images` |
@@ -180,6 +187,7 @@ Routes are mounted **twice** — once at root and once under `/api` — so both 
 - **Photo URLs** are stored encrypted with `pgp_sym_encrypt` / `pgp_sym_decrypt` using `PHOTOS_ENC_KEY`.
 - **Rental logs** track creation events in `rental_logs` for audit purposes.
 - **Odometer** is stored on the rental record (not the car).
+- **Users** are stored in `public.users` with bcrypt password hashes. The legacy env-based credentials still work as a fallback if the user is not found in the table.
 
 ## Testing Instructions
 
@@ -196,7 +204,7 @@ npm run test
 ## Security Considerations
 
 - Session cookies are `httpOnly`, `sameSite: lax`, and `secure` only in production.
-- Admin credentials are the only auth mechanism; there is no user registration.
+- Admin credentials are stored in the `public.users` table; there is no public registration endpoint.
 - Supabase service-role key is validated to reject publishable keys.
 - Photo storage paths include the username to avoid collisions.
 - Upload failures trigger full rollback: stored files are removed and the rental record is deleted.
