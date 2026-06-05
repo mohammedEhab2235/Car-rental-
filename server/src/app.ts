@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import session from "express-session";
+import { createRequire } from "node:module";
 import { getEnv } from "./env.js";
 import { createSupabaseAdmin } from "./supabase.js";
 import { requireSession } from "./middleware/requireSession.js";
@@ -44,15 +45,10 @@ const sessionConfig: session.SessionOptions = {
   }
 };
 
-// NOTE: connect-pg-simple is disabled because the PostgreSQL server is unreachable.
-// Sessions use express-session's default memory store. This means sessions will NOT
-// persist across server restarts, but login will work. Re-enable connect-pg-simple
-// once DATABASE_URL points to a reachable PostgreSQL server.
-/*
 if (env.DATABASE_URL) {
   try {
     const require = createRequire(import.meta.url);
-    const connectPgSimple = require("connect-pg-simple") as unknown as (session: { Store: typeof session.Store }) => typeof session.Store;
+    const connectPgSimple = require("connect-pg-simple") as any;
     const PgStore = connectPgSimple(session);
     sessionConfig.store = new PgStore({
       conString: env.DATABASE_URL,
@@ -62,7 +58,6 @@ if (env.DATABASE_URL) {
     // Fallback to default memory store if connect-pg-simple fails to initialize
   }
 }
-*/
 
 app.use(session(sessionConfig));
 
