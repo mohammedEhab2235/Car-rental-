@@ -4,10 +4,18 @@ import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import MaintenanceModal from "@/components/MaintenanceModal";
 import Input from "@/components/Input";
-import { useAuthStore } from "@/stores/auth";
 import { useToastStore } from "@/stores/toast";
 import type { Car } from "@/types";
 import { api } from "@/utils/api";
+
+const ARABIC_TO_ENGLISH: Record<string, string> = {
+  "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+  "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9"
+};
+
+function toEnglishNumbers(str: string): string {
+  return str.replace(/[٠-٩]/g, (d) => ARABIC_TO_ENGLISH[d] ?? d);
+}
 
 export default function Maintenance() {
   const push = useToastStore((s) => s.push);
@@ -46,9 +54,11 @@ export default function Maintenance() {
     if (!editCar) return;
     setSavingTarget(true);
     try {
+      const normalTarget = toEnglishNumbers(oilNormalTarget);
+      const transmissionTarget = toEnglishNumbers(oilTransmissionTarget);
       const body: Record<string, unknown> = {};
-      if (oilNormalTarget.trim()) body.oil_normal_target = Number(oilNormalTarget);
-      if (oilTransmissionTarget.trim()) body.oil_transmission_target = Number(oilTransmissionTarget);
+      if (normalTarget.trim()) body.oil_normal_target = Number(normalTarget);
+      if (transmissionTarget.trim()) body.oil_transmission_target = Number(transmissionTarget);
 
       await api(`/cars/${editCar.id}`, { method: "PATCH", body: JSON.stringify(body) });
       setCars((list) =>
@@ -216,9 +226,10 @@ export default function Maintenance() {
           <div>
             <div className="mb-2 text-xs font-semibold text-white/80">تغيير زيت المحرك كل (كم)</div>
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={oilNormalTarget}
-              onChange={(e) => setOilNormalTarget(e.target.value)}
+              onChange={(e) => setOilNormalTarget(toEnglishNumbers(e.target.value))}
               placeholder="مثال: 5000"
               dir="ltr"
             />
@@ -226,9 +237,10 @@ export default function Maintenance() {
           <div>
             <div className="mb-2 text-xs font-semibold text-white/80">تغيير زيت الفتيس كل (كم)</div>
             <Input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={oilTransmissionTarget}
-              onChange={(e) => setOilTransmissionTarget(e.target.value)}
+              onChange={(e) => setOilTransmissionTarget(toEnglishNumbers(e.target.value))}
               placeholder="مثال: 40000"
               dir="ltr"
             />
