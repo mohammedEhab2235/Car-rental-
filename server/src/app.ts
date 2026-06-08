@@ -12,7 +12,7 @@ import { rentalsRouter } from "./routes/rentals.js";
 import { analyticsRouter } from "./routes/analytics.js";
 import { rentalLogsRouter } from "./routes/rentalLogs.js";
 import { maintenanceRouter } from "./routes/maintenance.js";
-import sql, { ensureSslModeRequire } from "./db.js";
+import sql from "./db.js";
 
 
 const env = getEnv();
@@ -52,8 +52,13 @@ if (env.DATABASE_URL && sql) {
     const require = createRequire(import.meta.url);
     const connectPgSimple = require("connect-pg-simple") as any;
     const PgStore = connectPgSimple(session);
+    const { Pool } = require("pg");
+    const pool = new Pool({
+      connectionString: env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
     sessionConfig.store = new PgStore({
-      conString: ensureSslModeRequire(env.DATABASE_URL),
+      pool,
       createTableIfMissing: true
     });
     console.log("Session store: PostgreSQL (connect-pg-simple)");
