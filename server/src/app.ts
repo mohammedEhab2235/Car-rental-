@@ -12,6 +12,7 @@ import { rentalsRouter } from "./routes/rentals.js";
 import { analyticsRouter } from "./routes/analytics.js";
 import { rentalLogsRouter } from "./routes/rentalLogs.js";
 import { maintenanceRouter } from "./routes/maintenance.js";
+import sql, { ensureSslModeRequire } from "./db.js";
 
 
 const env = getEnv();
@@ -45,17 +46,19 @@ const sessionConfig: session.SessionOptions = {
   }
 };
 
-if (env.DATABASE_URL) {
+if (env.DATABASE_URL && sql) {
   try {
+    await sql`SELECT 1`;
     const require = createRequire(import.meta.url);
     const connectPgSimple = require("connect-pg-simple") as any;
     const PgStore = connectPgSimple(session);
     sessionConfig.store = new PgStore({
-      conString: env.DATABASE_URL,
+      conString: ensureSslModeRequire(env.DATABASE_URL),
       createTableIfMissing: true
     });
+    console.log("Session store: PostgreSQL (connect-pg-simple)");
   } catch (err) {
-    console.error("connect-pg-simple failed, falling back to memory store:", err);
+    console.error("Database unreachable for session store, falling back to memory store:", err);
   }
 }
 

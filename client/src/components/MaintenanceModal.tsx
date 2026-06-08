@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Wrench } from "lucide-react";
 import Button from "@/components/Button";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import Input from "@/components/Input";
 import type { Car, MaintenanceRecord } from "@/types";
 import { api } from "@/utils/api";
@@ -30,44 +31,31 @@ export default function MaintenanceModal({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
   // New maintenance form state
   const [items, setItems] = useState<ItemRow[]>([{ id: "1", item_type: "", price: "" }]);
-  const [oilNormalCurrent, setOilNormalCurrent] = useState("");
-  const [oilTransmissionCurrent, setOilTransmissionCurrent] = useState("");
+  const [oilNormalCurrent, setOilNormalCurrent] = useState(String(car.odometer ?? ""));
+  const [oilTransmissionCurrent, setOilTransmissionCurrent] = useState(String(car.odometer ?? ""));
 
   const oilNormalTarget = car.oil_normal_target ?? 0;
   const oilTransmissionTarget = car.oil_transmission_target ?? 0;
 
-  const lastOilNormal = useMemo(() => {
-    const rec = records.find((r) => r.oil_normal_current != null);
-    return rec?.oil_normal_current ?? null;
-  }, [records]);
-
-  const lastOilTransmission = useMemo(() => {
-    const rec = records.find((r) => r.oil_transmission_current != null);
-    return rec?.oil_transmission_current ?? null;
-  }, [records]);
-
   const oilNormalStatus = useMemo(() => {
-    const current = Number(oilNormalCurrent);
-    if (!oilNormalTarget || !current) return null;
-    const prev = lastOilNormal ?? 0;
-    const diff = current - prev;
-    if (diff >= oilNormalTarget) return { ok: false, text: "يجب تغيير زيت المحرك!" };
-    const remaining = oilNormalTarget - diff;
+    if (!oilNormalTarget) return null;
+    const currentKm = car.km_since_oil_normal_change ?? 0;
+    if (currentKm >= oilNormalTarget) return { ok: false, text: "يجب تغيير زيت المحرك!" };
+    const remaining = oilNormalTarget - currentKm;
     return { ok: true, text: `متبقي ${remaining.toLocaleString()} كم قبل تغيير زيت المحرك` };
-  }, [oilNormalCurrent, oilNormalTarget, lastOilNormal]);
+  }, [car.km_since_oil_normal_change, oilNormalTarget]);
 
   const oilTransmissionStatus = useMemo(() => {
-    const current = Number(oilTransmissionCurrent);
-    if (!oilTransmissionTarget || !current) return null;
-    const prev = lastOilTransmission ?? 0;
-    const diff = current - prev;
-    if (diff >= oilTransmissionTarget) return { ok: false, text: "يجب تغيير زيت الفتيس!" };
-    const remaining = oilTransmissionTarget - diff;
+    if (!oilTransmissionTarget) return null;
+    const currentKm = car.km_since_oil_transmission_change ?? 0;
+    if (currentKm >= oilTransmissionTarget) return { ok: false, text: "يجب تغيير زيت الفتيس!" };
+    const remaining = oilTransmissionTarget - currentKm;
     return { ok: true, text: `متبقي ${remaining.toLocaleString()} كم قبل تغيير زيت الفتيس` };
-  }, [oilTransmissionCurrent, oilTransmissionTarget, lastOilTransmission]);
+  }, [car.km_since_oil_transmission_change, oilTransmissionTarget]);
 
   async function loadRecords() {
     setLoading(true);
@@ -83,6 +71,11 @@ export default function MaintenanceModal({
 
   useEffect(() => {
     loadRecords();
+    setOilNormalCurrent(String(car.odometer ?? ""));
+    setOilTransmissionCurrent(String(car.odometer ?? ""));
+    setItems([{ id: "1", item_type: "", price: "" }]);
+    setError(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [car.id]);
 
   function addItemRow() {
@@ -192,7 +185,7 @@ export default function MaintenanceModal({
       <div className="rounded-2xl border border-white/20 bg-[#181825]/70 p-4">
         <div className="text-sm font-bold text-white/90">نوع الصيانة</div>
         <div className="mt-3 space-y-3">
-          {items.map((row, idx) => (
+          {items.map((row) => (
             <div key={row.id} className="flex items-start gap-2">
               <div className="min-w-0 flex-1">
                 <Input
@@ -214,7 +207,7 @@ export default function MaintenanceModal({
               {items.length > 1 ? (
                 <button
                   type="button"
-                  onClick={() => removeItemRow(row.id)}
+                  onClick={() => setDeletingItemId(row.id)}
                   className="mt-2 text-white/40 transition hover:text-red-400"
                   title="حذف"
                 >
@@ -242,6 +235,19 @@ export default function MaintenanceModal({
           حفظ الصيانة
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={!!deletingItemId}
+        title="تأكيد الحذف"
+        message="هل أنت متأكد أنك تريد حذف هذا البند؟"
+        onConfirm={() => {
+          if (deletingItemId) {
+            removeItemRow(deletingItemId);
+            setDeletingItemId(null);
+          }
+        }}
+        onCancel={() => setDeletingItemId(null)}
+      />
 
       {/* Past records */}
       <div className="rounded-2xl border border-white/20 bg-[#181825]/70 p-4">

@@ -18,7 +18,9 @@ const CarUpdateSchema = z
     daily_price: z.coerce.number().nonnegative().optional(),
     odometer: z.coerce.number().int().nonnegative().optional(),
     oil_normal_target: z.coerce.number().int().nonnegative().optional(),
-    oil_transmission_target: z.coerce.number().int().nonnegative().optional()
+    oil_transmission_target: z.coerce.number().int().nonnegative().optional(),
+    km_since_oil_normal_change: z.coerce.number().int().nonnegative().optional(),
+    km_since_oil_transmission_change: z.coerce.number().int().nonnegative().optional()
   })
   .refine((v) => Object.keys(v).length > 0, { message: "لا توجد حقول للتحديث." });
 
@@ -34,7 +36,7 @@ export function carsRouter(supabase: SupabaseClient) {
     const { id } = req.params;
     const { data, error } = await supabase
       .from("cars")
-      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,created_at")
+      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,km_since_oil_normal_change,km_since_oil_transmission_change,created_at")
       .eq("id", id)
       .single();
 
@@ -59,7 +61,7 @@ export function carsRouter(supabase: SupabaseClient) {
 
     let query = supabase
       .from("cars")
-      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,created_at")
+      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,km_since_oil_normal_change,km_since_oil_transmission_change,created_at")
       .order("created_at", { ascending: false });
 
     if (isPaginated) {
@@ -106,7 +108,7 @@ export function carsRouter(supabase: SupabaseClient) {
     const { data, error } = await supabase
       .from("cars")
       .insert(payload)
-      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,created_at")
+      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,km_since_oil_normal_change,km_since_oil_transmission_change,created_at")
       .single();
 
     if (error) {
@@ -131,7 +133,7 @@ export function carsRouter(supabase: SupabaseClient) {
       .from("cars")
       .update(payload)
       .eq("id", id)
-      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,created_at")
+      .select("id,car_name,model,color,daily_price,odometer,oil_normal_target,oil_transmission_target,km_since_oil_normal_change,km_since_oil_transmission_change,created_at")
       .single();
 
     if (error) {

@@ -7,6 +7,8 @@ export type Car = {
   odometer: number;
   oil_normal_target: number | null;
   oil_transmission_target: number | null;
+  km_since_oil_normal_change: number;
+  km_since_oil_transmission_change: number;
   created_at: string;
 };
 
@@ -66,6 +68,22 @@ export type MaintenanceSummary = {
   car_id: string;
   label: string;
   total: number;
+};
+
+export type MaintenanceAlert = {
+  car_id: string;
+  car_name: string;
+  model: string;
+  color: string;
+  odometer: number;
+  normal_needed: boolean;
+  transmission_needed: boolean;
+  normal_diff: number;
+  transmission_diff: number;
+  normal_target: number | null;
+  transmission_target: number | null;
+  normal_remaining: number | null;
+  transmission_remaining: number | null;
 };
 
 export type AnalyticsResponse = {

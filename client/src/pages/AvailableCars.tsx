@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, History, Pencil, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import Modal from "@/components/Modal";
 import NewCarForm from "@/components/NewCarForm";
 import EditCarForm from "@/components/EditCarForm";
@@ -279,27 +280,20 @@ export default function AvailableCars() {
         ) : null}
       </Modal>
 
-      <Modal
+      <ConfirmDialog
         open={Boolean(deletingCar)}
         title="تأكيد حذف السيارة"
-        onClose={() => (deleteLoading ? null : setDeletingCar(null))}
-      >
-        {deletingCar ? (
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-white/20 bg-[#181825]/70 p-4 text-sm text-white/80">
+        message={
+          deletingCar ? (
+            <>
               هل أنت متأكد أنك تريد حذف <span className="font-bold">{deletingCar.car_name}</span>؟
-            </div>
-            <div className="flex items-center justify-end gap-2">
-              <Button variant="secondary" disabled={deleteLoading} onClick={() => setDeletingCar(null)}>
-                إلغاء
-              </Button>
-              <Button className="bg-red-600 hover:bg-red-700" loading={deleteLoading} onClick={confirmDelete}>
-                حذف
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </Modal>
+            </>
+          ) : null
+        }
+        onConfirm={confirmDelete}
+        onCancel={() => setDeletingCar(null)}
+        loading={deleteLoading}
+      />
     </div>
   );
 }

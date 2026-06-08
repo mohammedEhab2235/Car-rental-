@@ -3,9 +3,10 @@ import { Eye, CheckCircle } from "lucide-react";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import { cn } from "@/lib/utils";
+import { useToastStore } from "@/stores/toast";
 import type { Car, Rental, RentalPhoto } from "@/types";
 import { api } from "@/utils/api";
-import { formatDate, formatDateTimeShort } from "@/utils/dates";
+import { formatDateTimeShort } from "@/utils/dates";
 
 function canEndRental(r: Rental): boolean {
   if (r.final_odometer != null) return false;
@@ -24,6 +25,7 @@ export default function RentalsTable({
   className?: string;
   onUpdate?: (rental: Rental) => void;
 }) {
+  const push = useToastStore((s) => s.push);
   const carLabel = new Map(cars.map((c) => [c.id, `${c.car_name} — ${c.model}`] as const));
   const [previewRental, setPreviewRental] = useState<Rental | null>(null);
   const [photos, setPhotos] = useState<RentalPhoto[]>([]);
@@ -67,12 +69,25 @@ export default function RentalsTable({
     setEndingLoading(true);
     setEndingError(null);
     try {
-      const data = await api<{ rental: Rental }>(`/rentals/${endRental.id}`, {
+      const data = await api<{ rental: Rental; maintenance_alert?: { normal_needed: boolean; transmission_needed: boolean } }>(`/rentals/${endRental.id}`, {
         method: "PATCH",
         body: JSON.stringify({ final_odometer: value })
       });
       onUpdate?.(data.rental);
       setEndRental(null);
+
+      if (data.maintenance_alert) {
+        const parts = [];
+        if (data.maintenance_alert.normal_needed) parts.push("زيت المحرك");
+        if (data.maintenance_alert.transmission_needed) parts.push("زيت الفتيس");
+        if (parts.length > 0) {
+          push({
+            kind: "warning",
+            title: "تنبيه صيانة",
+            message: `السيارة تحتاج تغيير: ${parts.join(" و ")}`
+          });
+        }
+      }
     } catch (err) {
       setEndingError(err instanceof Error ? err.message : "حدث خطأ أثناء التحديث");
     } finally {

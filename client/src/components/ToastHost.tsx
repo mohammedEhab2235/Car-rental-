@@ -5,7 +5,8 @@ import { useToastStore } from "@/stores/toast";
 const kindStyles: Record<string, string> = {
   success: "border-emerald-500/30 bg-emerald-500/10 text-emerald-50",
   error: "border-red-500/30 bg-red-500/10 text-red-50",
-  info: "border-white/20 bg-white/5 text-white"
+  info: "border-white/20 bg-white/5 text-white",
+  warning: "border-amber-500/30 bg-amber-500/10 text-amber-50"
 };
 
 export default function ToastHost() {

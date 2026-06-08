@@ -5,6 +5,10 @@ export type Car = {
   color: string;
   daily_price: number;
   odometer: number;
+  oil_normal_target: number | null;
+  oil_transmission_target: number | null;
+  km_since_oil_normal_change: number;
+  km_since_oil_transmission_change: number;
   created_at: string;
 };
 

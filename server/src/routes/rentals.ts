@@ -82,7 +82,7 @@ export function rentalsRouter(supabase: SupabaseClient, bucket: string, photosEn
 
     const { data: rental, error: fetchErr } = await supabase
       .from("rentals")
-      .select("id,car_id,name")
+      .select("id,car_id,name,odometer")
       .eq("id", id)
       .single();
 
@@ -90,6 +90,12 @@ export function rentalsRouter(supabase: SupabaseClient, bucket: string, photosEn
       res.status(404).json({ message: "العقد غير موجود." });
       return;
     }
+
+    const { data: car, error: carFetchErr } = await supabase
+      .from("cars")
+      .select("id,odometer,oil_normal_target,oil_transmission_target,km_since_oil_normal_change,km_since_oil_transmission_change")
+      .eq("id", rental.car_id)
+      .single();
 
     const { data: updated, error: updErr } = await supabase
       .from("rentals")
@@ -103,11 +109,36 @@ export function rentalsRouter(supabase: SupabaseClient, bucket: string, photosEn
       return;
     }
 
-    // Update car's current odometer
+    const oldOdometer = car && !carFetchErr ? Number(car.odometer ?? 0) : (rental.odometer ?? 0);
+    const finalOdometer = Math.round(body.final_odometer);
+    const drivenKm = Math.max(0, finalOdometer - oldOdometer);
+
+    const newNormalKm = (car && !carFetchErr ? Number(car.km_since_oil_normal_change ?? 0) : 0) + drivenKm;
+    const newTransmissionKm = (car && !carFetchErr ? Number(car.km_since_oil_transmission_change ?? 0) : 0) + drivenKm;
+
+    // Update car's current odometer and oil km counters
     await supabase
       .from("cars")
-      .update({ odometer: Math.round(body.final_odometer) })
+      .update({
+        odometer: finalOdometer,
+        km_since_oil_normal_change: newNormalKm,
+        km_since_oil_transmission_change: newTransmissionKm
+      })
       .eq("id", rental.car_id);
+
+    // Check if oil maintenance is needed after this rental
+    let maintenanceAlert: { normal_needed: boolean; transmission_needed: boolean; normal_diff: number; transmission_diff: number } | undefined;
+    if (car && !carFetchErr) {
+      const normalTarget = car.oil_normal_target ? Number(car.oil_normal_target) : 0;
+      const transmissionTarget = car.oil_transmission_target ? Number(car.oil_transmission_target) : 0;
+
+      const normalNeeded = normalTarget > 0 && newNormalKm >= normalTarget;
+      const transmissionNeeded = transmissionTarget > 0 && newTransmissionKm >= transmissionTarget;
+
+      if (normalNeeded || transmissionNeeded) {
+        maintenanceAlert = { normal_needed: normalNeeded, transmission_needed: transmissionNeeded, normal_diff: newNormalKm, transmission_diff: newTransmissionKm };
+      }
+    }
 
     const actor = req.session.user?.username ?? null;
     await supabase.from("rental_logs").insert({
@@ -115,10 +146,10 @@ export function rentalsRouter(supabase: SupabaseClient, bucket: string, photosEn
       car_id: rental.car_id,
       action: "rental_ended",
       actor_username: actor,
-      payload: { rental_id: rental.id, final_odometer: body.final_odometer }
+      payload: { rental_id: rental.id, final_odometer: body.final_odometer, driven_km: drivenKm }
     });
 
-    res.json({ rental: updated });
+    res.json({ rental: updated, maintenance_alert: maintenanceAlert });
   });
 
   router.get("/:id/photos", async (req, res) => {

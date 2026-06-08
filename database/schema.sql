@@ -8,6 +8,10 @@ CREATE TABLE IF NOT EXISTS public.cars (
   color TEXT NOT NULL,
   daily_price NUMERIC(10,2) NOT NULL DEFAULT 0,
   odometer BIGINT NOT NULL DEFAULT 0,
+  oil_normal_target BIGINT,
+  oil_transmission_target BIGINT,
+  km_since_oil_normal_change BIGINT NOT NULL DEFAULT 0,
+  km_since_oil_transmission_change BIGINT NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

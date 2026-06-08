@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ToastKind = "success" | "error" | "info";
+export type ToastKind = "success" | "error" | "info" | "warning";
 
 export type ToastItem = {
   id: string;

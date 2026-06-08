@@ -84,6 +84,49 @@ export function maintenanceRouter(supabase: SupabaseClient) {
     res.json({ summary });
   });
 
+  router.get("/alerts", async (_req, res) => {
+    const { data: cars, error: carsErr } = await supabase
+      .from("cars")
+      .select("id,car_name,model,color,odometer,oil_normal_target,oil_transmission_target,km_since_oil_normal_change,km_since_oil_transmission_change")
+      .or("oil_normal_target.not.is.null,oil_transmission_target.not.is.null");
+
+    if (carsErr) {
+      res.status(500).json({ message: "تعذر تحميل بيانات السيارات.", details: carsErr.message });
+      return;
+    }
+
+    const alerts = [];
+    for (const car of cars ?? []) {
+      const normalDiff = Number(car.km_since_oil_normal_change ?? 0);
+      const transmissionDiff = Number(car.km_since_oil_transmission_change ?? 0);
+      const normalTarget = car.oil_normal_target ? Number(car.oil_normal_target) : 0;
+      const transmissionTarget = car.oil_transmission_target ? Number(car.oil_transmission_target) : 0;
+
+      const normalNeeded = normalTarget > 0 && normalDiff >= normalTarget;
+      const transmissionNeeded = transmissionTarget > 0 && transmissionDiff >= transmissionTarget;
+
+      if (normalNeeded || transmissionNeeded) {
+        alerts.push({
+          car_id: car.id,
+          car_name: car.car_name,
+          model: car.model,
+          color: car.color,
+          odometer: car.odometer,
+          normal_needed: normalNeeded,
+          transmission_needed: transmissionNeeded,
+          normal_diff: normalDiff,
+          transmission_diff: transmissionDiff,
+          normal_target: normalTarget,
+          transmission_target: transmissionTarget,
+          normal_remaining: normalTarget > 0 ? Math.max(0, normalTarget - normalDiff) : null,
+          transmission_remaining: transmissionTarget > 0 ? Math.max(0, transmissionTarget - transmissionDiff) : null
+        });
+      }
+    }
+
+    res.json({ alerts });
+  });
+
   router.get("/", async (req, res) => {
     const carId = req.query.car_id as string | undefined;
     if (!carId) {
@@ -138,6 +181,17 @@ export function maintenanceRouter(supabase: SupabaseClient) {
 
     const payload = parsed.data;
 
+    const { data: car, error: carErr } = await supabase
+      .from("cars")
+      .select("id,odometer,km_since_oil_normal_change,km_since_oil_transmission_change")
+      .eq("id", payload.car_id)
+      .single();
+
+    if (carErr || !car) {
+      res.status(400).json({ message: "السيارة غير موجودة." });
+      return;
+    }
+
     const { data: record, error: recErr } = await supabase
       .from("maintenance_records")
       .insert({
@@ -168,6 +222,18 @@ export function maintenanceRouter(supabase: SupabaseClient) {
       await supabase.from("maintenance_records").delete().eq("id", record.id);
       res.status(500).json({ message: "تعذر حفظ تفاصيل الصيانة وتم التراجع.", details: itemsErr.message });
       return;
+    }
+
+    // Update km-since-change counters based on the odometer reading at maintenance time
+    const carUpdate: Record<string, number> = {};
+    if (payload.oil_normal_current !== undefined) {
+      carUpdate.km_since_oil_normal_change = Math.max(0, Number(car.odometer ?? 0) - payload.oil_normal_current);
+    }
+    if (payload.oil_transmission_current !== undefined) {
+      carUpdate.km_since_oil_transmission_change = Math.max(0, Number(car.odometer ?? 0) - payload.oil_transmission_current);
+    }
+    if (Object.keys(carUpdate).length > 0) {
+      await supabase.from("cars").update(carUpdate).eq("id", car.id);
     }
 
     const totalPrice = payload.items.reduce((sum, it) => sum + Number(it.price ?? 0), 0);

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Button from "@/components/Button";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import Input from "@/components/Input";
 import TimeInput12H from "@/components/TimeInput12H";
 import { api } from "@/utils/api";
@@ -46,6 +47,7 @@ export default function NewRentalForm({
   const [customDailyPrice, setCustomDailyPrice] = useState("");
   const [hasEditedCustomPrice, setHasEditedCustomPrice] = useState(false);
   const [previews, setPreviews] = useState<Preview[]>([]);
+  const [deletingPreviewId, setDeletingPreviewId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -361,7 +363,7 @@ export default function NewRentalForm({
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => removePreview(p.id)}
+                  onClick={() => setDeletingPreviewId(p.id)}
                   className="group relative overflow-hidden rounded-xl border border-white/20 bg-black/30"
                   title="اضغط للحذف"
                 >
@@ -381,6 +383,19 @@ export default function NewRentalForm({
           حفظ العقد
         </Button>
       </div>
+
+      <ConfirmDialog
+        open={!!deletingPreviewId}
+        title="تأكيد الحذف"
+        message="هل أنت متأكد أنك تريد حذف هذه الصورة؟"
+        onConfirm={() => {
+          if (deletingPreviewId) {
+            removePreview(deletingPreviewId);
+            setDeletingPreviewId(null);
+          }
+        }}
+        onCancel={() => setDeletingPreviewId(null)}
+      />
     </form>
   );
 }

@@ -10,6 +10,8 @@ function ensureSslModeRequire(connectionString: string): string {
   }
 }
 
+export { ensureSslModeRequire };
+
 export function ensureSslMode(connectionString: string): string {
   try {
     const url = new URL(connectionString);
